@@ -1,0 +1,1808 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <link rel="manifest" href="manifest.json" />
+
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="icons/icon-192.png" />
+    <meta name="theme-color" content="#f7d9dd" />
+
+    <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+    <title>Happy Birthday 🤍</title>
+
+    <style>
+      /* ============================================================
+   1. 색상 · 기본
+   ============================================================ */
+      :root {
+        --white: #fffdfa;
+        --cream: #fdf6ee;
+        --pink: #f7d9dd;
+        --pink-d: #e8b4bc;
+        --beige: #f1e6d8;
+        --text: #6b5b53;
+        --text-l: #a89a91;
+        --gold: #d9b98c;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        font-family:
+          "Nanum Pen Script", "Gaegu", "Apple SD Gothic Neo", "Noto Sans KR",
+          cursive, sans-serif;
+        background: linear-gradient(
+          165deg,
+          var(--white) 0%,
+          var(--cream) 50%,
+          var(--pink) 140%
+        );
+        color: var(--text);
+        overflow: hidden;
+        letter-spacing: 0.02em;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* ============================================================
+   2. 시네마틱 레이어 (플래시 · 파티클 캔버스)
+   ============================================================ */
+      #flash {
+        position: fixed;
+        inset: 0;
+        background: #fff;
+        z-index: 200;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.8s ease;
+      }
+      #flash.on {
+        opacity: 1;
+      }
+      .dark-scene {
+        background: radial-gradient(
+          ellipse at 50% 60%,
+          #2b2330 0%,
+          #171219 70%
+        ) !important;
+        color: #f3e9e4;
+      }
+      #bgCanvas {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      /* ============================================================
+   3. 페이지 공통 · 전환 · 등장
+   ============================================================ */
+      .page {
+        position: fixed;
+        inset: 0;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 32px 24px;
+        padding-bottom: calc(36px + env(safe-area-inset-bottom));
+        opacity: 0;
+        visibility: hidden;
+        transition:
+          opacity 1.2s ease,
+          visibility 1.2s;
+        overflow-y: auto;
+      }
+      .page.active {
+        opacity: 1;
+        visibility: visible;
+      }
+      .rise {
+        opacity: 0;
+        transform: translateY(28px);
+        transition:
+          opacity 1.2s cubic-bezier(0.22, 1, 0.36, 1),
+          transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .page.active .rise {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .page.active .rise:nth-child(1) {
+        transition-delay: 0.2s;
+      }
+      .page.active .rise:nth-child(2) {
+        transition-delay: 0.5s;
+      }
+      .page.active .rise:nth-child(3) {
+        transition-delay: 0.8s;
+      }
+      .page.active .rise:nth-child(4) {
+        transition-delay: 1.1s;
+      }
+      .page.active .rise:nth-child(5) {
+        transition-delay: 1.4s;
+      }
+      .page.active .rise:nth-child(6) {
+        transition-delay: 1.7s;
+      }
+
+      h1 {
+        font-size: clamp(30px, 8vw, 48px);
+        font-weight: 400;
+      }
+      .script {
+        font-family:
+          "Snell Roundhand", "Savoye LET", "Brush Script MT", cursive;
+        color: var(--pink-d);
+      }
+      .sub {
+        font-size: clamp(18px, 5vw, 23px);
+        line-height: 1.95;
+        color: var(--text-l);
+      }
+      .msg {
+        font-size: clamp(22px, 6.4vw, 32px);
+        line-height: 2.05;
+      }
+
+      .btn {
+        font-family: inherit;
+        font-size: 19px;
+        letter-spacing: 0.12em;
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.78);
+        border: 1px solid var(--pink-d);
+        border-radius: 999px;
+        padding: 14px 46px;
+        margin-top: 36px;
+        cursor: pointer;
+        backdrop-filter: blur(4px);
+        box-shadow: 0 6px 18px rgba(232, 180, 188, 0.35);
+        transition:
+          transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+          box-shadow 0.5s,
+          background 0.5s;
+      }
+      .btn:active {
+        transform: scale(0.95);
+      }
+      @media (hover: hover) {
+        .btn:hover {
+          transform: translateY(-3px);
+          background: #fff;
+          box-shadow: 0 12px 28px rgba(232, 180, 188, 0.5);
+        }
+      }
+
+      /* ============================================================
+   4. 로딩 → 카운트다운
+   ============================================================ */
+      #loader {
+        position: fixed;
+        inset: 0;
+        z-index: 150;
+        background: var(--cream);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        transition: opacity 1.2s ease;
+      }
+      #loader.hide {
+        opacity: 0;
+        pointer-events: none;
+      }
+      #loader .heart {
+        font-size: 46px;
+        animation: beat 1.1s ease-in-out infinite;
+      }
+      #loader p {
+        color: var(--text-l);
+        letter-spacing: 0.3em;
+        font-size: 16px;
+      }
+      @keyframes beat {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        30% {
+          transform: scale(1.28);
+        }
+        60% {
+          transform: scale(1.05);
+        }
+      }
+      #countNum {
+        font-size: clamp(90px, 30vw, 150px);
+        color: var(--pink-d);
+        font-family: "Snell Roundhand", "Brush Script MT", cursive;
+        animation: countPop 1s ease forwards;
+      }
+      @keyframes countPop {
+        0% {
+          opacity: 0;
+          transform: scale(0.4);
+        }
+        35% {
+          opacity: 1;
+          transform: scale(1.1);
+        }
+        70% {
+          transform: scale(1);
+        }
+        100% {
+          opacity: 0;
+          transform: scale(1.6);
+        }
+      }
+
+      /* ============================================================
+   5. 인트로
+   ============================================================ */
+      #p-intro .heart-top {
+        font-size: 48px;
+        animation: float 3.4s ease-in-out infinite;
+      }
+      #p-intro h1 {
+        font-size: clamp(44px, 12vw, 80px);
+      }
+      #p-intro .toname {
+        font-size: clamp(24px, 7vw, 34px);
+        color: var(--text);
+      }
+      #p-intro .date {
+        letter-spacing: 0.35em;
+        color: var(--gold);
+        font-size: clamp(16px, 4.4vw, 20px);
+      }
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-11px);
+        }
+      }
+
+      /* ============================================================
+   6. 꽃잎·하트·반짝이
+   ============================================================ */
+      .petal,
+      .fheart,
+      .spark {
+        position: absolute;
+        top: -8%;
+        pointer-events: none;
+        z-index: 0;
+      }
+      .petal {
+        background: radial-gradient(circle at 30% 30%, #fbe4e8, var(--pink-d));
+        border-radius: 150% 0 150% 0;
+        opacity: 0.85;
+        animation: fall linear infinite;
+      }
+      .fheart {
+        color: var(--pink-d);
+        opacity: 0.7;
+        animation: fall linear infinite;
+      }
+      .spark {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: #fff;
+        box-shadow: 0 0 8px 3px rgba(255, 240, 220, 0.9);
+        animation: fall linear infinite;
+      }
+      @keyframes fall {
+        0% {
+          transform: translateY(-6vh) rotate(0) translateX(0);
+        }
+        50% {
+          transform: translateY(52vh) rotate(200deg) translateX(6vw);
+        }
+        100% {
+          transform: translateY(112vh) rotate(420deg) translateX(-5vw);
+        }
+      }
+
+      /* ============================================================
+   7. 폴라로이드 — 📷 찰칵 연출
+   ============================================================ */
+      #shutter {
+        position: absolute;
+        inset: 0;
+        z-index: 6;
+        background: #fff;
+        opacity: 0;
+        pointer-events: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+      }
+      #shutter.snap {
+        animation: snapFx 0.55s ease;
+      }
+      #shutter .cam {
+        font-size: 44px;
+        opacity: 0;
+      }
+      #shutter.snap .cam {
+        animation: camPop 0.55s ease;
+      }
+      @keyframes snapFx {
+        0% {
+          opacity: 0;
+        }
+        18% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+      @keyframes camPop {
+        0% {
+          opacity: 0;
+          transform: scale(0.6);
+        }
+        25% {
+          opacity: 1;
+          transform: scale(1.1);
+        }
+        100% {
+          opacity: 0;
+          transform: scale(1);
+        }
+      }
+
+      .polaroid-stage {
+        position: relative;
+        width: min(80vw, 360px);
+        height: calc(min(80vw, 360px) * 1.32);
+        perspective: 900px;
+      }
+      .polaroid {
+        position: absolute;
+        inset: 0;
+        background: #fff;
+        border-radius: 6px;
+        padding: 14px 14px 0;
+        box-shadow: 0 18px 44px rgba(120, 95, 85, 0.3);
+        display: flex;
+        flex-direction: column;
+        opacity: 0;
+        transform: translateY(-70px) rotate(0deg) scale(0.9);
+        transition:
+          opacity 0.9s ease,
+          transform 1.3s cubic-bezier(0.22, 1, 0.36, 1);
+        cursor: zoom-in;
+      }
+      .polaroid.drop {
+        opacity: 1;
+        transform: translateY(0) rotate(var(--tilt, -3deg)) scale(1.02);
+      }
+      .polaroid.out {
+        opacity: 0;
+        transform: translateY(40px) rotate(8deg) scale(0.92);
+        transition:
+          opacity 0.6s,
+          transform 0.6s;
+      }
+      .polaroid .pic {
+        flex: 1;
+        background: var(--beige);
+        overflow: hidden;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .polaroid img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .polaroid .ph {
+        position: absolute;
+        color: var(--text-l);
+        font-size: 16px;
+        line-height: 1.8;
+      }
+      .polaroid .pcap {
+        height: 92px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 3px;
+      }
+      .polaroid .ptitle {
+        font-size: clamp(18px, 5vw, 22px);
+        color: var(--text);
+      }
+      .polaroid .pline {
+        font-size: clamp(14px, 4vw, 17px);
+        color: var(--pink-d);
+        opacity: 0;
+        transform: translateY(8px);
+        transition:
+          opacity 0.9s 1s,
+          transform 0.9s 1s;
+      }
+      .polaroid .pdate {
+        font-size: 13px;
+        color: var(--gold);
+        letter-spacing: 0.15em;
+      }
+      .polaroid.drop .pline {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .nav-btn {
+        position: absolute;
+        top: 46%;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: none;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.9);
+        color: var(--text);
+        font-size: 19px;
+        box-shadow: 0 4px 14px rgba(163, 132, 120, 0.28);
+        z-index: 7;
+        transition: transform 0.3s;
+      }
+      .nav-btn:active {
+        transform: scale(0.88);
+      }
+      .nav-prev {
+        left: -16px;
+      }
+      .nav-next {
+        right: -16px;
+      }
+
+      .dots {
+        margin-top: 16px;
+        display: flex;
+        gap: 6px;
+        justify-content: center;
+        flex-wrap: wrap;
+        max-width: 80vw;
+      }
+      .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--pink);
+        transition: 0.4s;
+      }
+      .dot.on {
+        background: var(--pink-d);
+        transform: scale(1.4);
+      }
+
+      #lightbox {
+        position: fixed;
+        inset: 0;
+        z-index: 120;
+        background: rgba(50, 38, 35, 0.82);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: 0.5s;
+        cursor: zoom-out;
+        padding: 20px;
+      }
+      #lightbox.show {
+        opacity: 1;
+        visibility: visible;
+      }
+      #lightbox img {
+        max-width: 94vw;
+        max-height: 86vh;
+        border-radius: 12px;
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+        transform: scale(0.9);
+        transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      #lightbox.show img {
+        transform: scale(1);
+      }
+
+      /* ============================================================
+   7.5. 시네마틱 브릿지 (검은 화면 연출)
+   ============================================================ */
+      #p-transition {
+        background: #111;
+        z-index: 100;
+      }
+      #trans-text {
+        color: #fff;
+        font-size: clamp(24px, 7vw, 32px);
+        opacity: 0;
+        transition: opacity 1s ease;
+        letter-spacing: 0.15em;
+        font-weight: 300;
+      }
+      /* ============================================================
+   8. ✉️ 편지 봉투
+   ============================================================ */
+      #envelope {
+        width: min(74vw, 300px);
+        cursor: pointer;
+        position: relative;
+        margin-top: 10px;
+        transition: transform 0.5s;
+      }
+      #envelope:active {
+        transform: scale(0.97);
+      }
+      .env-body {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 3/2;
+        background: #fbf3e8;
+        border: 1px solid #eaddcc;
+        border-radius: 8px;
+        box-shadow: 0 16px 38px rgba(150, 120, 100, 0.25);
+        overflow: visible;
+      }
+      .env-flap {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        height: 52%;
+        background: linear-gradient(#f6ecdd, #f0e2cf);
+        border-radius: 8px 8px 0 0;
+        clip-path: polygon(0 0, 100% 0, 50% 100%);
+        transform-origin: top;
+        transition: transform 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+        z-index: 3;
+      }
+      #envelope.open .env-flap {
+        transform: rotateX(180deg);
+        z-index: 1;
+      }
+      .env-letter {
+        position: absolute;
+        left: 8%;
+        right: 8%;
+        bottom: 8%;
+        height: 70%;
+        background: #fffdf8;
+        border: 1px solid #eee2d2;
+        border-radius: 4px;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        transition: transform 1.1s 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      #envelope.open .env-letter {
+        transform: translateY(-46%);
+      }
+      .env-seal {
+        position: absolute;
+        left: 50%;
+        top: 46%;
+        transform: translate(-50%, -50%);
+        z-index: 4;
+        font-size: 30px;
+        transition:
+          opacity 0.6s,
+          transform 0.6s;
+      }
+      #envelope.open .env-seal {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.6);
+      }
+
+      /* ============================================================
+   9. 편지 — 종이 + 타이핑
+   ============================================================ */
+      .letter-wrap {
+        transition:
+          transform 1.2s cubic-bezier(0.22, 1, 0.36, 1),
+          box-shadow 0.8s,
+          opacity 0.8s ease;
+        width: min(88vw, 460px);
+
+        max-height: 70vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+
+        scrollbar-width: none;
+        text-align: left;
+        border-radius: 4px;
+        padding: 38px 30px 90px;
+        position: relative;
+        scroll-behavior: smooth;
+        background:
+          radial-gradient(
+            circle at 8% 4%,
+            rgba(217, 185, 140, 0.12),
+            transparent 42%
+          ),
+          repeating-linear-gradient(
+            transparent,
+            transparent 43px,
+            rgba(232, 180, 188, 0.4) 44px
+          ),
+          linear-gradient(#fffdf8, #fbf4ea);
+        border: 1px solid #eaddcc;
+        box-shadow:
+          0 3px 0 #f3e9da,
+          0 6px 0 #efe2d0,
+          0 22px 44px rgba(150, 120, 100, 0.22);
+      }
+
+      .letter-wrap::-webkit-scrollbar {
+        display: none;
+      }
+      .letter-wrap::before {
+        content: "💌";
+        position: absolute;
+        top: 10px;
+        right: 14px;
+        font-size: 20px;
+        opacity: 0.6;
+      }
+      .letter-wrap p {
+        font-size: clamp(19px, 5.2vw, 23px);
+        line-height: 44px;
+        white-space: pre-line;
+        min-height: 44px;
+      }
+      .letter-wrap p .caret {
+        display: inline-block;
+        width: 2px;
+        height: 1em;
+        background: var(--pink-d);
+        vertical-align: -2px;
+        animation: blink 0.8s step-end infinite;
+      }
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+      .letter-hint {
+        margin-top: 14px;
+        font-size: 16px;
+        color: var(--text-l);
+        animation: float 2.6s infinite;
+      }
+
+      /* ============================================================
+   10. 마지막 선물 — 시네마틱
+   ============================================================ */
+      #p-finale {
+        transition:
+          opacity 1.2s ease,
+          visibility 1.2s,
+          background 2.5s ease;
+      }
+      .fin-step {
+        opacity: 0;
+        transition:
+          opacity 2s ease,
+          transform 2s ease;
+        transform: translateY(16px);
+      }
+      .fin-step.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      #finPhoto {
+        width: min(60vw, 240px);
+        aspect-ratio: 4/5;
+        background: #3a3040;
+        border: 8px solid #fdf6ee;
+        border-radius: 4px;
+        box-shadow:
+          0 0 60px rgba(247, 217, 221, 0.25),
+          0 20px 50px rgba(0, 0, 0, 0.5);
+        margin: 16px 0;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform: rotate(-2.5deg);
+        position: relative;
+      }
+      #finPhoto img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      #finPhoto .ph {
+        color: #9d8fa0;
+        font-size: 15px;
+        line-height: 1.8;
+        position: absolute;
+      }
+      #finText1,
+      #finText2 {
+        font-size: clamp(24px, 7vw, 36px);
+        line-height: 1.9;
+        color: #f8eee9;
+      }
+      #finText2 {
+        color: var(--pink);
+      }
+      #finHB {
+        font-family: "Snell Roundhand", "Brush Script MT", cursive;
+        font-size: clamp(38px, 10vw, 64px);
+        color: var(--pink);
+      }
+      .night-star {
+        position: absolute;
+        border-radius: 50%;
+        background: #fff;
+        pointer-events: none;
+        animation: twinkle ease-in-out infinite;
+      }
+      @keyframes twinkle {
+        0%,
+        100% {
+          opacity: 0.15;
+          transform: scale(0.8);
+        }
+        50% {
+          opacity: 0.95;
+          transform: scale(1.2);
+        }
+      }
+      .fw {
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        pointer-events: none;
+        animation: fw-fly 1.4s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+      }
+      @keyframes fw-fly {
+        0% {
+          transform: translate(0, 0) scale(1);
+          opacity: 1;
+        }
+        100% {
+          transform: translate(var(--dx), var(--dy)) scale(0.2);
+          opacity: 0;
+        }
+      }
+      .confetti {
+        position: absolute;
+        top: -4%;
+        pointer-events: none;
+        animation: cfall linear forwards;
+      }
+      @keyframes cfall {
+        0% {
+          transform: translateY(0) rotate(0);
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(114vh) rotate(720deg);
+          opacity: 0.7;
+        }
+      }
+      .rise-heart {
+        position: absolute;
+        bottom: -8%;
+        pointer-events: none;
+        animation: up linear forwards;
+      }
+      @keyframes up {
+        0% {
+          transform: translateY(0) scale(0.6);
+          opacity: 0;
+        }
+        12% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(-118vh) scale(1.3) rotate(14deg);
+          opacity: 0;
+        }
+      }
+
+      /* ============================================================
+   11. "끝이 아니야" · 엔딩(YES) · 풀스크린 마지막 사진
+   ============================================================ */
+      #p-notend,
+      #p-ending {
+        background: radial-gradient(
+          ellipse at 50% 55%,
+          #332a38 0%,
+          #171219 75%
+        );
+      }
+      #p-notend .msg,
+      #p-ending .msg {
+        color: #f6ebe6;
+      }
+      #endReply {
+        font-size: clamp(22px, 6.4vw, 32px);
+        line-height: 2.15;
+        color: var(--pink);
+      }
+      .btn-dark {
+        background: rgba(247, 217, 221, 0.14);
+        color: #fbe4e8;
+        border-color: var(--pink-d);
+      }
+
+      /* ============================================================
+   12. 음악 버튼
+   ============================================================ */
+      #musicBtn {
+        position: fixed;
+        top: calc(16px + env(safe-area-inset-top));
+        right: 16px;
+        z-index: 110;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 1px solid var(--pink);
+        background: rgba(255, 255, 255, 0.82);
+        backdrop-filter: blur(4px);
+        font-size: 18px;
+        cursor: pointer;
+        box-shadow: 0 4px 14px rgba(232, 180, 188, 0.3);
+        display: none;
+        transition: transform 0.3s;
+      }
+      #musicBtn.playing {
+        animation: spin 5s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="bgCanvas"></canvas>
+    <div id="flash"></div>
+
+    <!-- ═══════ 로딩 → 카운트다운 ═══════ -->
+    <div id="loader">
+      <div class="heart" id="loadHeart">🤍</div>
+      <p id="loadText">F O R &nbsp; Y O U</p>
+    </div>
+
+    <!-- ═══════ [MUSIC] ═══════ -->
+    <audio id="bgm" src="music/bgm.mp3" loop preload="auto"></audio>
+    <!-- 추가된 슬라이드 효과음 -->
+    <audio id="slideSnd" src="music/slide.mp3" preload="auto"></audio>
+    <button id="musicBtn" onclick="toggleMusic()" aria-label="배경음악">
+      ♪
+    </button>
+
+    <!-- ═══════ 1. 인트로 [CONFIG] ═══════ -->
+    <section class="page active" id="p-intro">
+      <div class="rise heart-top">🤍</div>
+      <h1 class="rise script">Happy Birthday</h1>
+      <p class="rise toname">우리 가빈이에게</p>
+      <p class="rise date">2026 . 07 . 31</p>
+      <button
+        class="rise btn"
+        onclick="
+          cine('p-petal');
+          setTimeout(startMusic, 700);
+        "
+      >
+        열어보기
+      </button>
+    </section>
+
+    <!-- ═══════ 2. 꽃잎 ═══════ -->
+    <section class="page" id="p-petal">
+      <p class="rise msg">
+        오늘 하루만큼은<br />세상에서 가장 행복했으면 좋겠어.
+      </p>
+      <button class="rise btn" onclick="cine('p-photo')">다음 →</button>
+    </section>
+
+    <!-- ═══════ 3. [PHOTOS] 폴라로이드 11장 (📷 찰칵 → 툭 → 한 줄 감성) ═══════ -->
+    <section class="page" id="p-photo">
+      <h1 class="rise" style="font-size: clamp(24px, 6.6vw, 34px)">
+        너와 함께한 모든 순간들
+      </h1>
+      <div class="rise" style="position: relative">
+        <div class="polaroid-stage" id="stage">
+          <div id="shutter"><span class="cam">📷</span></div>
+
+          <!-- 테마 1 ~ 11 이미지 생략 (기존과 동일하게 유지) -->
+          <div
+            class="polaroid"
+            data-date="2026.02.13"
+            data-title="첫 고백"
+            data-line="&ldquo;맑은 날, 연분홍빛 꽃다발과 함께한 우리의 시작&rdquo;"
+            style="--tilt: -3deg"
+          >
+            <div class="pic">
+              <img src="image/1.png" alt="" onerror="this.remove()" />
+            </div>
+            <div class="pcap">
+              <span class="ptitle"></span><span class="pline"></span
+              ><span class="pdate"></span>
+            </div>
+          </div>
+          <div
+            class="polaroid"
+            data-date="2026.02.20"
+            data-title="첫 발렌타인데이"
+            data-line="&ldquo;마음을 전했던 달콤한 발렌타인데이 선물&rdquo;"
+            style="--tilt: 2deg"
+          >
+            <div class="pic">
+              <img src="image/2.jpeg" alt="" onerror="this.remove()" />
+            </div>
+            <div class="pcap">
+              <span class="ptitle"></span><span class="pline"></span
+              ><span class="pdate"></span>
+            </div>
+          </div>
+          <div
+            class="polaroid"
+            data-date="2026.03.14"
+            data-title="첫 화이트데이"
+            data-line="&ldquo;노란 꽃다발과 테테에서 함께 먹은 오코노미야키&rdquo;"
+            style="--tilt: -1.5deg"
+          >
+            <div class="pic">
+              <img src="image/3.png" alt="" onerror="this.remove()" />
+            </div>
+            <div class="pcap">
+              <span class="ptitle"></span><span class="pline"></span
+              ><span class="pdate"></span>
+            </div>
+          </div>
+          <div
+            class="polaroid"
+            data-date="2026.03.28"
+            data-title="첫 인생네컷"
+            data-line="&ldquo;작은 프레임 속에 처음으로 함께 담아본 풋풋한 미소&rdquo;"
+            style="--tilt: 3deg"
+          >
+            <div class="pic">
+              <img src="image/4.jpeg" alt="" onerror="this.remove()" />
+            </div>
+            <div class="pcap">
+              <span class="ptitle"></span><span class="pline"></span
+              ><span class="pdate"></span>
+            </div>
+          </div>
+          <div
+            class="polaroid"
+            data-date="2026.04.05"
+            data-title="첫 영화관 데이트"
+            data-line="&ldquo;예쁜 벚꽃 산책과 영화 '왕과 사는 남자'&rdquo;"
+            style="--tilt: -2.5deg"
+          >
+            <div class="pic">
+              <img src="image/5.png" alt="" onerror="this.remove()" />
+            </div>
+            <div class="pcap">
+              <span class="ptitle"></span><span class="pline"></span
+              ><span class="pdate"></span>
+            </div>
+          </div>
+          <div
+            class="polaroid"
+            data-date="2026.04.15"
+            data-title="내 생일"
+            data-line="&ldquo;정성과 사랑이 듬뿍 담겨있던 생일 선물&rdquo;"
+            style="--tilt: 1.5deg"
+          >
+            <div class="pic">
+              <img src="image/6.jpeg" alt="" onerror="this.remove()" />
+            </div>
+            <div class="pcap">
+              <span class="ptitle"></span><span class="pline"></span
+              ><span class="pdate"></span>
+            </div>
+          </div>
+          <div
+            class="polaroid"
+            data-date="2026.05.13"
+            data-title="두 번째 인생네컷"
+            data-line="&ldquo;어느새 조금 더 편안하고 자연스러워진 우리&rdquo;"
+            style="--tilt: -1deg"
+          >
+            <div class="pic">
+              <img src="image/7.jpeg" alt="" onerror="this.remove()" />
+            </div>
+            <div class="pcap">
+              <span class="ptitle"></span><span class="pline"></span
+              ><span class="pdate"></span>
+            </div>
+          </div>
+          <div
+            class="polaroid"
+            data-date="2026.05.23"
+            data-title="우리의 100일"
+            data-line="&ldquo;아뜰리에 호수 커플링, 커닝 카페, 그리고 세 번째 네컷&rdquo;"
+            style="--tilt: 2.5deg"
+          >
+            <div class="pic">
+              <img src="image/8.png" alt="" onerror="this.remove()" />
+            </div>
+            <div class="pcap">
+              <span class="ptitle"></span><span class="pline"></span
+              ><span class="pdate"></span>
+            </div>
+          </div>
+          <div
+            class="polaroid"
+            data-date="2026.06.22"
+            data-title="네 번째 인생네컷"
+            data-line="&ldquo;시간이 지날수록 점점 더 닮아가는 우리의 모습&rdquo;"
+            style="--tilt: -3.5deg"
+          >
+            <div class="pic">
+              <img src="image/9.jpeg" alt="" onerror="this.remove()" />
+            </div>
+            <div class="pcap">
+              <span class="ptitle"></span><span class="pline"></span
+              ><span class="pdate"></span>
+            </div>
+          </div>
+          <div
+            class="polaroid"
+            data-date="늘 언제나"
+            data-title="함께 버틴 시간"
+            data-line="&ldquo;함께 알바하며 서로에게 의지했던 든든한 시간들&rdquo;"
+            style="--tilt: 3.5deg"
+          >
+            <div class="pic">
+              <img src="image/11.png" alt="" onerror="this.remove()" />
+            </div>
+            <div class="pcap">
+              <span class="ptitle"></span><span class="pline"></span
+              ><span class="pdate"></span>
+            </div>
+          </div>
+          <div
+            class="polaroid"
+            data-date="우리의 일상"
+            data-title="평범해서 더 행복한 하루"
+            data-line="&ldquo;같이 맛있는 거 먹으러 다니며 차곡차곡 쌓은 매일의 행복&rdquo;"
+            style="--tilt: -2deg"
+          >
+            <div class="pic">
+              <img src="image/10.png" alt="" onerror="this.remove()" />
+            </div>
+            <div class="pcap">
+              <span class="ptitle"></span><span class="pline"></span
+              ><span class="pdate"></span>
+            </div>
+          </div>
+        </div>
+
+        <button
+          class="nav-btn nav-prev"
+          onclick="moveSlide(-1)"
+          aria-label="이전"
+        >
+          ‹
+        </button>
+        <button
+          class="nav-btn nav-next"
+          onclick="moveSlide(1)"
+          aria-label="다음"
+        >
+          ›
+        </button>
+        <div class="dots" id="dots"></div>
+      </div>
+      <button class="rise btn" onclick="cine('p-transition')">다음 →</button>
+    </section>
+
+    <!-- ═══════ 7.5. 브릿지: 과거에서 오늘로의 전환 (검은 화면 연출) ═══════ -->
+    <section class="page" id="p-transition">
+      <p id="trans-text"></p>
+    </section>
+
+    <!-- ═══════ 6. ✉️ 편지 봉투 ═══════ -->
+    <section class="page" id="p-envelope">
+      <p class="rise msg">✉️</p>
+      <p class="rise msg">여보에게 온 편지가 있어.</p>
+      <div class="rise" id="envelope" onclick="openEnvelope()">
+        <div class="env-body">
+          <div class="env-letter">💌</div>
+          <div class="env-flap"></div>
+          <div class="env-seal">🤍</div>
+        </div>
+      </div>
+      <p class="rise sub" style="font-size: 16px">봉투를 눌러서 열어봐</p>
+    </section>
+
+    <!-- ═══════ 7. [LETTER] 편지 ═══════ -->
+    <section class="page" id="p-letter">
+      <h1 class="rise" style="font-size: clamp(24px, 6.6vw, 34px)">
+        우리 가빈이에게
+      </h1>
+      <div class="rise letter-wrap" id="letter">
+        <p data-text="가빈아,"></p>
+        <p data-text="생일 정말 축하해"></p>
+        <p data-text="처음 여보의 생일을 챙겨주는데"></p>
+        <p data-text="그냥 생일 축하해. 라는 말보다,"></p>
+        <p data-text="조금 더 오래 기억에 남을 선물을 해주고 싶어서"></p>
+        <p data-text="하나씩 준비해 봤어."></p>
+
+        <p data-text=""></p>
+
+        <p data-text="꽃도 준비하고,"></p>
+        <p data-text="케이크도 고르고,"></p>
+        <p data-text="편지도 쓰고,"></p>
+        <p data-text="그리고 밤마다 조금씩 코딩하면서"></p>
+        <p data-text="이 작은 앱도 만들었어."></p>
+
+        <p data-text=""></p>
+
+        <p data-text="사실 처음 만들어 보는 거라"></p>
+        <p data-text="서툰 부분도 있을 거야."></p>
+        <p data-text="그래도 이 안에는"></p>
+        <p data-text="내가 담을 수 있는 마음을"></p>
+        <p data-text="최대한 많이 담아봤어."></p>
+
+        <p data-text=""></p>
+
+        <p data-text="그래도 여보가 웃으면서 봐준다면"></p>
+        <p data-text="그걸로 충분할 것 같아."></p>
+
+        <p data-text=""></p>
+
+        <p data-text="함께한 시간을 사진으로 다시 보니까,"></p>
+        <p data-text="특별한 날도 있었지만"></p>
+        <p data-text="아무 일 없던 평범한 하루들이"></p>
+        <p data-text="더 소중하게 느껴졌어."></p>
+
+        <p data-text=""></p>
+
+        <p data-text="앞으로도 특별한 날만이 아니라"></p>
+        <p data-text="평범한 하루도 함께 웃을 수 있는 사람이 되고 싶어."></p>
+
+        <p data-text=""></p>
+
+        <p data-text="언제나 내 곁에 있어줘서 고맙고,"></p>
+        <p data-text="내 하루를 행복하게 만들어줘서 고마워."></p>
+
+        <p data-text=""></p>
+
+        <p data-text="오늘은 누구보다 행복한 하루를 보냈으면 좋겠어."></p>
+        <p data-text="다시 한번,"></p>
+        <p data-text="생일 정말 축하해. 🤍"></p>
+        <p data-text="사랑해."></p>
+
+        <p data-text=""></p>
+
+        <p data-text="— 여보 하나 웃게 해주려고 밤새 행복했던 사람"></p>
+      </div>
+      <p class="rise letter-hint">한 글자씩, 진심을 담아서 ↓</p>
+      <button class="rise btn" onclick="cine('p-future')">다음 →</button>
+    </section>
+
+    <!-- ═══════ 8. 우리의 미래 ═══════ -->
+    <section class="page" id="p-future">
+      <div
+        class="rise"
+        style="
+          font-size: 26px;
+          letter-spacing: 0.5em;
+          animation: float 3s infinite;
+        "
+      >
+        ✨ 🤍 ✨
+      </div>
+      <p class="rise msg">
+        앞으로 다가올<br />모든 계절도<br />너와 함께 걷고 싶어.
+      </p>
+      <button class="rise btn" onclick="startFinale()">
+        마지막 선물 보기 🎁
+      </button>
+    </section>
+
+    <!-- ═══════ 9. [FINALE] 마지막 선물 ═══════ -->
+    <section class="page" id="p-finale">
+      <div class="fin-step" id="finPhotoWrap">
+        <div id="finPhoto">
+          <img src="image/final.jpeg" alt="" onerror="this.remove()" />
+        </div>
+      </div>
+      <p class="fin-step" id="finText1">태어나줘서 고마워.</p>
+      <p class="fin-step" id="finText2">사랑해.</p>
+      <h1 class="fin-step" id="finHB">Happy Birthday ❤️</h1>
+      <button
+        class="fin-step btn btn-dark"
+        id="finBtn"
+        onclick="cine('p-notend')"
+      >
+        →
+      </button>
+    </section>
+
+    <!-- ═══════ 10. 끝이 아니야 (여운) ═══════ -->
+    <section class="page" id="p-notend">
+      <p class="rise msg">🤍</p>
+      <p class="rise msg">끝이 아니야.</p>
+      <p
+        class="rise msg"
+        style="font-size: clamp(19px, 5.4vw, 26px); color: #c9b6bd"
+      >
+        우리 앞으로도<br />계속 추억 만들자.
+      </p>
+      <button class="rise btn btn-dark" onclick="cine('p-ending')">
+        다음 →
+      </button>
+    </section>
+
+    <!-- ═══════ 11. 오늘 하루 행복했어? ═══════ -->
+    <section class="page" id="p-ending">
+      <p class="rise msg" id="endQ">오늘 하루, 행복했어?</p>
+      <button
+        class="rise btn btn-dark"
+        id="btnYes"
+        onclick="answerYes()"
+        style="font-size: 21px"
+      >
+        웅, 행복했어 🤍
+      </button>
+      <p id="endReply" style="display: none"></p>
+    </section>
+
+    <!-- ═══════ 12. [LASTPHOTO] 풀스크린 마지막 사진 + PS. ═══════ -->
+    <section class="page" id="p-last">
+      <div id="lastBg"></div>
+      <div class="rise" id="lastPhoto">
+        <span class="ph">📷 images/last.jpg</span>
+        <img
+          src="images/last.jpg"
+          alt=""
+          onerror="this.remove()"
+          onload="
+            document.getElementById('lastBg').style.backgroundImage =
+              'url(' + this.src + ')'
+          "
+        />
+      </div>
+      <p id="lastPS">
+        🤍<br /><br />PS.<br />이 웹사이트는<br />세상에 하나뿐인<br />너만을
+        위해 만들었어.
+      </p>
+      <div class="rise" id="lastBtns">
+        <button class="btn btn-dark" onclick="saveMemory()">
+          오늘의 추억 저장하기 📸
+        </button>
+        <!-- '처음으로' 클릭 시 bgm 완전 종료 처리 -->
+        <button
+          class="btn btn-dark"
+          onclick="
+            bgm.pause();
+            location.reload();
+          "
+        >
+          처음으로 🤍
+        </button>
+      </div>
+    </section>
+
+    <div id="lightbox" onclick="this.classList.remove('show')">
+      <img id="lightImg" alt="" />
+    </div>
+
+    <script>
+      /* ============================================================
+         0. 로딩 → 카운트다운
+         ============================================================ */
+      window.addEventListener("load", () => {
+        const text = document.getElementById("loadText");
+        const seq = ["3", "2", "1", "🤍"];
+        let i = 0;
+        setTimeout(function tick() {
+          if (i < seq.length) {
+            text.style.display = "none";
+            const old = document.getElementById("countNum");
+            if (old) old.remove();
+            const lh = document.querySelector("#loader .heart");
+            if (lh) lh.remove();
+            const el = document.createElement("div");
+            el.id = "countNum";
+            el.textContent = seq[i];
+            document.getElementById("loader").prepend(el);
+            i++;
+            setTimeout(tick, 1000);
+          } else {
+            document.getElementById("loader").classList.add("hide");
+          }
+        }, 1600);
+      });
+
+      /* ============================================================
+         1. 시네마틱 전환 (흰 플래시)
+         ============================================================ */
+      function cine(id) {
+        if (id === "p-future") {
+          fadeVol(0.35, 1500);
+        }
+        if (id === "p-last") {
+          particleMode = "night";
+          fadeVol(0.25, 5000); // ⑦ 마지막 사진 조금씩 줄이기
+        }
+        // 🎞️ 사진 넘길 때 필름 넘어가는 소리 (슥-) 추가
+        const slideSnd = document.getElementById("slideSnd");
+        if (slideSnd) {
+          slideSnd.volume = 0.3; // 💡 여기서 효과음 볼륨을 조절하세요 (0.0 ~ 1.0)
+          slideSnd.currentTime = 0;
+          slideSnd.play().catch(() => {});
+        }
+
+        const flash = document.getElementById("flash");
+        flash.classList.add("on");
+        setTimeout(() => {
+          document
+            .querySelectorAll(".page")
+            .forEach((p) => p.classList.remove("active"));
+          const next = document.getElementById(id);
+          next.classList.add("active");
+          next.scrollTop = 0;
+          onEnter(id);
+          flash.classList.remove("on");
+        }, 850);
+      }
+      function onEnter(id) {
+        if (id === "p-petal") makeFalling();
+        if (id === "p-photo") {
+          showSlide(0);
+          resetTimer();
+        }
+        if (id === "p-transition") playTransition();
+        if (id === "p-letter") typeLetter();
+        if (id === "p-notend" || id === "p-ending") {
+          particleMode = "night";
+        }
+      }
+
+      /* ============================================================
+         2. 배경 파티클 (별·꽃가루·빛·하트)
+         ============================================================ */
+      const cv = document.getElementById("bgCanvas"),
+        ctx = cv.getContext("2d");
+      let W,
+        H,
+        parts = [],
+        particleMode = "day";
+      function sizeCanvas() {
+        W = cv.width = innerWidth;
+        H = cv.height = innerHeight;
+      }
+      sizeCanvas();
+      addEventListener("resize", sizeCanvas);
+      (function makeParts() {
+        for (let i = 0; i < 46; i++) {
+          parts.push({
+            x: Math.random() * W,
+            y: Math.random() * H,
+            r: 1 + Math.random() * 2.4,
+            vx: (Math.random() - 0.5) * 0.15,
+            vy: -0.06 - Math.random() * 0.22,
+            tw: Math.random() * Math.PI * 2,
+            tws: 0.01 + Math.random() * 0.03,
+            type:
+              Math.random() < 0.12
+                ? "heart"
+                : Math.random() < 0.5
+                  ? "star"
+                  : "dust",
+          });
+        }
+      })();
+      (function draw() {
+        ctx.clearRect(0, 0, W, H);
+        parts.forEach((p) => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.tw += p.tws;
+          if (p.y < -10) {
+            p.y = H + 10;
+            p.x = Math.random() * W;
+          }
+          const a = 0.25 + Math.abs(Math.sin(p.tw)) * 0.6;
+          if (p.type === "heart") {
+            ctx.globalAlpha = a * 0.8;
+            ctx.font = p.r * 6 + "px serif";
+            ctx.fillText("🤍", p.x, p.y);
+          } else {
+            ctx.globalAlpha = a;
+            ctx.fillStyle =
+              particleMode === "night"
+                ? "#fff"
+                : p.type === "star"
+                  ? "#f3d9a8"
+                  : "#f0c6cd";
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, 7);
+            ctx.fill();
+          }
+        });
+        ctx.globalAlpha = 1;
+        requestAnimationFrame(draw);
+      })();
+
+      /* ============================================================
+         3. 배경음악 — 페이드 인/아웃
+         ============================================================ */
+      const bgm = document.getElementById("bgm");
+      const musicBtn = document.getElementById("musicBtn");
+      function fadeVol(target, ms) {
+        const from = bgm.volume,
+          steps = 30,
+          dt = ms / steps;
+        let n = 0;
+        const t = setInterval(() => {
+          n++;
+          bgm.volume = Math.min(
+            1,
+            Math.max(0, from + ((target - from) * n) / steps),
+          );
+          if (n >= steps) clearInterval(t);
+        }, dt);
+      }
+      function startMusic() {
+        musicBtn.style.display = "block";
+        bgm.volume = 0;
+        bgm
+          .play()
+          .then(() => {
+            musicBtn.classList.add("playing");
+            fadeVol(0.45, 2500); // ③ 사진 구간 볼륨 45%
+          })
+          .catch(() => {});
+      }
+      function toggleMusic() {
+        if (bgm.paused) {
+          bgm.play().catch(() => {});
+          fadeVol(0.5, 1200);
+          musicBtn.classList.add("playing");
+        } else {
+          fadeVol(0, 900);
+          setTimeout(() => bgm.pause(), 950);
+          musicBtn.classList.remove("playing");
+        }
+      }
+
+      /* ============================================================
+         4. 꽃잎 + 하트 + 반짝이
+         ============================================================ */
+      let fallingMade = false;
+      function makeFalling() {
+        if (fallingMade) return;
+        fallingMade = true;
+        const page = document.getElementById("p-petal");
+        const add = (cls, n, make) => {
+          for (let i = 0; i < n; i++) {
+            const el = document.createElement("div");
+            el.className = cls;
+            make(el);
+            el.style.left = Math.random() * 100 + "vw";
+            el.style.animationDuration = 6 + Math.random() * 9 + "s";
+            el.style.animationDelay = Math.random() * 9 + "s";
+            page.appendChild(el);
+          }
+        };
+        add("petal", 30, (el) => {
+          const s = 9 + Math.random() * 15;
+          el.style.width = s + "px";
+          el.style.height = s + "px";
+        });
+        add("fheart", 12, (el) => {
+          el.textContent = "🤍";
+          el.style.fontSize = 12 + Math.random() * 16 + "px";
+        });
+        add("spark", 14, () => {});
+      }
+
+      /* ============================================================
+         5. 폴라로이드 — 📷 찰칵 → 툭 → 캡션 → 한 줄 감성
+         ============================================================ */
+      const pols = document.querySelectorAll(".polaroid");
+      const dotsBox = document.getElementById("dots");
+      const shutter = document.getElementById("shutter");
+      let cur = 0,
+        timer;
+      pols.forEach((p) => {
+        p.querySelector(".ptitle").textContent = p.dataset.title;
+        p.querySelector(".pline").innerHTML = p.dataset.line;
+        p.querySelector(".pdate").textContent = p.dataset.date;
+        const d = document.createElement("span");
+        d.className = "dot";
+        dotsBox.appendChild(d);
+        p.addEventListener("click", () => {
+          const img = p.querySelector("img");
+          if (!img) return;
+          document.getElementById("lightImg").src = img.src;
+          document.getElementById("lightbox").classList.add("show");
+        });
+      });
+      function showSlide(i) {
+        cur = (i + pols.length) % pols.length;
+        /* 📷 찰칵 효과 → 그 다음 폴라로이드가 툭 떨어짐 */
+        shutter.classList.remove("snap");
+        void shutter.offsetWidth;
+        shutter.classList.add("snap");
+
+        pols.forEach((p, n) => {
+          p.classList.remove("drop", "out");
+          if (n === cur) setTimeout(() => p.classList.add("drop"), 350);
+          else p.classList.add("out");
+          p.style.zIndex = n === cur ? 3 : 1;
+          p.style.pointerEvents = n === cur ? "auto" : "none";
+        });
+        document
+          .querySelectorAll(".dot")
+          .forEach((d, n) => d.classList.toggle("on", n === cur));
+      }
+      function moveSlide(dir) {
+        showSlide(cur + dir);
+        resetTimer();
+      }
+      function resetTimer() {
+        clearInterval(timer);
+        timer = setInterval(() => showSlide(cur + 1), 6000);
+      }
+
+      /* ============================================================
+         6. 🎬 브릿지 연출: 검은 화면 -> 텍스트 -> 편지로 이동
+         ============================================================ */
+      async function playTransition() {
+        const tText = document.getElementById("trans-text");
+        const t = (ms) => new Promise((r) => setTimeout(r, ms));
+
+        await t(800);
+
+        tText.innerHTML = "...";
+        tText.style.opacity = 1;
+        await t(2000);
+        tText.style.opacity = 0;
+        await t(1000);
+
+        tText.innerHTML = "그리고";
+        tText.style.opacity = 1;
+        await t(1500);
+        tText.style.opacity = 0;
+        await t(1000);
+
+        tText.innerHTML =
+          "<span style='color:var(--pink); font-weight:bold;'>오늘.</span>";
+        tText.style.opacity = 1;
+        await t(2000);
+        tText.style.opacity = 0;
+        await t(1000);
+
+        cine("p-envelope");
+      }
+
+      /* ============================================================
+         6. ✉️ 편지 봉투 — 열리면 편지 페이지로
+         ============================================================ */
+      function openEnvelope() {
+        const env = document.getElementById("envelope");
+        if (env.classList.contains("open")) return;
+        env.classList.add("open");
+        setTimeout(() => cine("p-letter"), 1900);
+      }
+
+      /* ============================================================
+         7. 편지 타이핑
+         ============================================================ */
+      let letterTyped = false;
+
+      async function typeLetter() {
+        fadeVol(0.22, 1200);
+
+        if (letterTyped) return;
+        letterTyped = true;
+
+        const paras = document.querySelectorAll("#letter p");
+
+        for (const p of paras) {
+          const text = p.dataset.text;
+
+          const caret = document.createElement("span");
+          caret.className = "caret";
+          p.appendChild(caret);
+
+          for (const ch of text) {
+            caret.before(document.createTextNode(ch));
+
+            await new Promise((r) => setTimeout(r, ch === "\n" ? 220 : 70));
+          }
+
+          caret.remove();
+
+          await new Promise((r) => setTimeout(r, text === "" ? 180 : 450));
+        }
+
+        await new Promise((r) => setTimeout(r, 800));
+
+        paper.style.transform = "rotate(-1deg)";
+        paper.style.boxShadow = "0 30px 60px rgba(120,95,85,.30)";
+      }
+
+      /* ============================================================
+         8. 마지막 선물 — 시네마틱 시퀀스
+         ============================================================ */
+      function startFinale() {
+        const flash = document.getElementById("flash");
+        flash.classList.add("on");
+        setTimeout(() => {
+          document
+            .querySelectorAll(".page")
+            .forEach((p) => p.classList.remove("active"));
+          const fin = document.getElementById("p-finale");
+          fin.classList.add("active", "dark-scene");
+          flash.classList.remove("on");
+          makeNightStars(fin);
+          const t = (ms) => new Promise((r) => setTimeout(r, ms));
+          (async () => {
+            await t(2200);
+            document.getElementById("finPhotoWrap").classList.add("show");
+            await t(2400);
+            document.getElementById("finText1").classList.add("show");
+            await t(3000);
+            document.getElementById("finText2").classList.add("show");
+            await t(1800);
+            fireworks(fin);
+            confettiBurst(fin);
+            heartRain(fin);
+
+            // ⑥ 마지막 선물: 볼륨 60%(0.55 추천치)로 올리기
+            fadeVol(0.55, 2500);
+
+            await t(1200);
+            document.getElementById("finHB").classList.add("show");
+            await t(2000);
+            document.getElementById("finBtn").classList.add("show");
+          })();
+        }, 900);
+      }
+      function makeNightStars(page) {
+        for (let i = 0; i < 60; i++) {
+          const s = document.createElement("div");
+          s.className = "night-star";
+          const size = 0.5 + Math.random() * 2.2;
+          s.style.width = s.style.height = size + "px";
+          s.style.left = Math.random() * 100 + "vw";
+          s.style.top = Math.random() * 100 + "vh";
+          s.style.animationDuration = 1.5 + Math.random() * 3 + "s";
+          s.style.animationDelay = Math.random() * 2 + "s";
+          page.appendChild(s);
+        }
+      }
+      function fireworks(page) {
+        const colors = ["#f7d9dd", "#e8b4bc", "#ffd9a8", "#fff", "#f3c6ff"];
+        for (let burst = 0; burst < 5; burst++) {
+          setTimeout(() => {
+            const cx = 15 + Math.random() * 70,
+              cy = 15 + Math.random() * 45;
+            for (let i = 0; i < 26; i++) {
+              const f = document.createElement("div");
+              f.className = "fw";
+              const ang = (Math.PI * 2 * i) / 26,
+                dist = 60 + Math.random() * 90;
+              f.style.left = cx + "vw";
+              f.style.top = cy + "vh";
+              f.style.background = colors[i % colors.length];
+              f.style.setProperty("--dx", Math.cos(ang) * dist + "px");
+              f.style.setProperty("--dy", Math.sin(ang) * dist + "px");
+              page.appendChild(f);
+              setTimeout(() => f.remove(), 1600);
+            }
+          }, burst * 600);
+        }
+      }
+      function confettiBurst(page) {
+        const colors = ["#f7d9dd", "#e8b4bc", "#f1e6d8", "#fff", "#ffd9a8"];
+        for (let i = 0; i < 70; i++) {
+          const c = document.createElement("div");
+          c.className = "confetti";
+          const s = 6 + Math.random() * 8;
+          c.style.width = s + "px";
+          c.style.height = s * 0.6 + "px";
+          c.style.background = colors[i % colors.length];
+          c.style.left = Math.random() * 100 + "vw";
+          c.style.borderRadius = Math.random() > 0.5 ? "50%" : "2px";
+          c.style.animationDuration = 3.5 + Math.random() * 3 + "s";
+          c.style.animationDelay = Math.random() * 1.5 + "s";
+          page.appendChild(c);
+          setTimeout(() => c.remove(), 9000);
+        }
+      }
+      function heartRain(page) {
+        const hearts = ["🤍", "💗", "🩷", "💕", "❤️"];
+        for (let i = 0; i < 46; i++) {
+          const h = document.createElement("div");
+          h.className = "rise-heart";
+          h.textContent = hearts[i % hearts.length];
+          h.style.left = Math.random() * 96 + "vw";
+          h.style.fontSize = 16 + Math.random() * 36 + "px";
+          h.style.animationDuration = 3 + Math.random() * 3.5 + "s";
+          h.style.animationDelay = Math.random() * 1.4 + "s";
+          page.appendChild(h);
+          setTimeout(() => h.remove(), 9000);
+        }
+      }
+
+      /* ============================================================
+         9. YES ❤️ → 풀스크린 마지막 사진으로
+         ============================================================ */
+      function answerYes() {
+        document.getElementById("endQ").style.display = "none";
+        document.getElementById("btnYes").style.display = "none";
+        const r = document.getElementById("endReply");
+        r.style.display = "block";
+        r.style.opacity = 0;
+        r.innerHTML =
+          "나도 정말 행복했어.<br><br>앞으로도<br>계속 네 곁에 있을게.<br><br>사랑해. 🤍";
+        requestAnimationFrame(() => {
+          r.style.transition = "opacity 2.2s ease";
+          r.style.opacity = 1;
+        });
+        heartRain(document.getElementById("p-ending"));
+        setTimeout(() => cine("p-last"), 6500);
+      }
+
+      /* ============================================================
+         10. 오늘의 추억 저장하기 📸
+         ============================================================ */
+      function saveMemory() {
+        const flash = document.getElementById("flash");
+        flash.classList.add("on");
+        setTimeout(() => {
+          flash.classList.remove("on");
+          const ps = document.getElementById("lastPS");
+          ps.innerHTML =
+            "📸<br><br>이 화면은 마음에 저장했고,<br><br>이제 진짜 오늘의 사진은<br>같이 찍으러 가자.";
+          ps.style.opacity = 1;
+          heartRain(document.getElementById("p-last"));
+        }, 700);
+      }
+    </script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("./service-worker.js");
+      }
+    </script>
+  </body>
+</html>
