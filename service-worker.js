@@ -1,4 +1,4 @@
-const CACHE_NAME = "happy-birthday-v4";
+const CACHE_NAME = "happy-birthday-v5";
 
 const urlsToCache = [
   "./",
@@ -23,9 +23,9 @@ const urlsToCache = [
   "./icons/icon-192.png",
   "./icons/icon-512.png",
 
-  //   "./image/final.jpg",
+  "./image/final.jpg",
 
-  //   "./image/last.jpg",
+  "./image/last.jpeg",
 ];
 
 self.addEventListener("install", (event) => {
