@@ -1,4 +1,4 @@
-const CACHE_NAME = "happy-birthday-v5";
+const CACHE_NAME = "happy-birthday-v6";
 
 const urlsToCache = [
   "./",
